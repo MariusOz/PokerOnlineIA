@@ -1,3 +1,6 @@
 spring:
   main:
     web-application-type: none
+
+pokerserver.adress: http://localhost:8080
+numberofplayer: 2

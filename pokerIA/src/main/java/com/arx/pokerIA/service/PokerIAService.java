@@ -1,16 +1,13 @@
 package com.arx.pokerIA.service;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Random;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.arx.pokerIA.PokerIaApplication;
 import com.arx.pokerIA.model.GameDTO;
 import com.arx.pokerIA.model.PlayerDTO;
 
@@ -22,16 +19,35 @@ public class PokerIAService {
 	@Autowired
 	private PokerRestService restService;
 
-	public void startIa(int gameId, String name) {
+	@Value("${numberofplayer}")
+	private int nbOfPlayer;
+
+	public void startIa(String name, int gameId) {
 		PlayerDTO player = restService.addPlayerToExistingGame(gameId, name);
+		LOG.info(name + " a bien été ajouté a la partie, son identifiant est : " + player.getPlayerId());
 		GameDTO game;
 
 		do {
 			game = restService.getGame(gameId, player.getPlayerId());
-			if (game.isMyTurn() == true) { // faire une méthode play() privé dans laquelle il y aura tout l'intelligence
-											// de l'IA
+			LOG.info("le joueur récupère bien les infos de la partie");
+			if (game.isMyTurn() && !GameStateStatusEnum.ENDED.equals(game.getStatus())) { // faire une méthode play()
+																							// privé dans laquelle il y
+																							// aura tout l'intelligence
+																							// de l'IA
 				ActionEnum action = play(game);
-				restService.play(game.getGameId(), player.getPlayerId(), action);
+				try {
+					restService.play(game.getGameId(), player.getPlayerId(), action);
+					LOG.info("le joueur joue bien son action : " + action);
+				} catch (Exception e) {
+					LOG.error("can't play", e);
+				}
+
+			} else {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 
 		} while (!isGameOver(game, name));
@@ -45,7 +61,17 @@ public class PokerIAService {
 	private boolean isGameOver(GameDTO game, String name) {
 		// TODO on arrete la boucle lorsque gameStateEnum est terminé ou que je suis
 		// éliminé
-		return GameStateStatusEnum.ENDED.equals(game.getStatus()) || isPlayerStillInGame(game, name);
+		boolean playerStillInGame = isPlayerStillInGame(game, name);
+		boolean isGameOver = GameStateStatusEnum.ENDED.equals(game.getStatus()) || !playerStillInGame;
+		if (isGameOver) {
+			LOG.info("la partie est terminée, status : " + game.getStatus() + ", still in game : " + playerStillInGame);
+			if (playerStillInGame) {
+				LOG.info("félicitations, vous avez gagné");
+			} else {
+				LOG.info("Vous avez perdu");
+			}
+		}
+		return isGameOver;
 	}
 
 	private boolean isPlayerStillInGame(GameDTO game, String name) {
@@ -55,5 +81,12 @@ public class PokerIAService {
 			}
 		}
 		return false;
+	}
+
+	public void startIa(String name) {
+		GameDTO game = restService.createGame(nbOfPlayer);
+		LOG.info("la partie numéro " +  game.getGameId() + " a été créer");
+		startIa(name, game.getGameId());
+		
 	}
 }

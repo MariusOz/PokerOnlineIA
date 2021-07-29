@@ -4,13 +4,8 @@ import com.arx.pokerIA.service.ColorEnum;
 
 public class Card {
 
-	private final int number;
-	private final ColorEnum color;
-
-	public Card(int number, ColorEnum color) {
-		this.number = number;
-		this.color = color;
-	}
+	private int number;
+	private ColorEnum color;
 
 	@Override
 	public int hashCode() {
@@ -49,7 +44,15 @@ public class Card {
 		return number;
 	}
 
+	public void setNumber(int number) {
+		this.number = number;
+	}
+
 	public ColorEnum getColor() {
 		return color;
+	}
+
+	public void setColor(ColorEnum color) {
+		this.color = color;
 	}
 }

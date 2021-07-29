@@ -1,5 +1,6 @@
 package com.arx.pokerIA.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -25,7 +26,9 @@ import com.arx.pokerIA.model.PlayerDTO;
 public class PokerRestService {
 	
 	private RestTemplate restTemplate = new RestTemplate();
-	private String serverAdress = "http://localhost:8080";
+	
+	@Value("${pokerserver.adress}")
+	private String serverAdress;
 	/**
 	 * en paramètre ; le nombre de joueur attendus en form data
 	 * @return
@@ -51,7 +54,7 @@ public class PokerRestService {
 		// passer les forms data
 		MultiValueMap<String, Object> map= new LinkedMultiValueMap<String, Object>();
 		map.add("playerId", playerId);
-		map.add("action", action);
+		map.add("playerAction", action.toString());
 		restTemplate.postForObject(serverAdress + "/games/" + gameId + "/play", map, Void.class);
 	}
 }
