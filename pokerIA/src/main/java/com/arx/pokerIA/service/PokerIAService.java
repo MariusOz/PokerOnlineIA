@@ -1,6 +1,8 @@
 package com.arx.pokerIA.service;
 
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +26,7 @@ public class PokerIAService {
 
 	public void startIa(String name, int gameId) {
 		PlayerDTO player = restService.addPlayerToExistingGame(gameId, name);
-		LOG.info(name + " a bien été ajouté a la partie, son identifiant est : " + player.getPlayerId());
+		LOG.info(name + " a bien été ajouté a la partie " + gameId + ", son identifiant est : " + player.getPlayerId());
 		GameDTO game;
 
 		do {
@@ -54,7 +56,6 @@ public class PokerIAService {
 	}
 
 	private ActionEnum play(GameDTO game) {
-
 		return ActionEnum.values()[new Random().nextInt(ActionEnum.values().length)];
 	}
 
@@ -84,9 +85,22 @@ public class PokerIAService {
 	}
 
 	public void startIa(String name) {
-		GameDTO game = restService.createGame(nbOfPlayer);
-		LOG.info("la partie numéro " +  game.getGameId() + " a été créer");
-		startIa(name, game.getGameId());
-		
+		Integer gameId = null;
+		List<GameDTO> gameList = restService.listGames();
+		if (gameList != null && !gameList.isEmpty()) {
+			List<GameDTO> waitingsGames = gameList.stream()
+					.filter(g -> GameStateStatusEnum.WAITING.equals(g.getStatus())).collect(Collectors.toList());
+			if (waitingsGames.size() == 1) {
+				gameId = waitingsGames.iterator().next().getGameId();
+			}
+		}
+
+		if (gameId == null) {
+			GameDTO game = restService.createGame(nbOfPlayer);
+			gameId = game.getGameId();
+			LOG.info("la partie numéro " + gameId + " a été créer");
+		}
+
+		startIa(name, gameId);
 	}
 }

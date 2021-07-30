@@ -37,8 +37,6 @@ public class PokerIaApplication implements CommandLineRunner{
 	public void run(String... args) throws IOException {
 		LOG.info("EXECUTING : command line runner");
 		
-		
-		
 		if(args.length == 2) {
 			pokerIa.startIa(args[0], Integer.valueOf(args[1]));
 			LOG.info("fin du programme");
