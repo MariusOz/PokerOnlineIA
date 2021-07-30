@@ -89,7 +89,6 @@ public class PokerIAService {
 			result =  playPreFlop(smallCard, bigCard, localPair, potentialLocalStraight, maxBet);
 		} else {
 			List<Card> deck = initDeck(game);
-
 			double winProba = getProba(smallCard, bigCard, game.getCardsOnTable(), deck);
 
 			if (winProba >= 80 && maxBet < 32) {
@@ -144,6 +143,7 @@ public class PokerIAService {
 			}
 		}
 		
+		LOG.info("Found, better: " + better + " , worse: " + worse);
 		return (worse / (worse + better)) * 100;
 	}
 
