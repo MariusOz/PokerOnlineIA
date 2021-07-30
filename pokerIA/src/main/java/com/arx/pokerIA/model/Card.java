@@ -7,6 +7,14 @@ public class Card {
 	private int number;
 	private ColorEnum color;
 
+	public Card(int number, ColorEnum color) {
+		this.number = number;
+		this.color = color;
+	}
+
+	public Card() {
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -38,6 +46,10 @@ public class Card {
 	@Override
 	public String toString() {
 		return Integer.toString(number) + "_" + color.toString();
+	}
+	
+	public String toShortString() {
+		return Integer.toString(number) + color.toString().substring(0,1);
 	}
 
 	public int getNumber() {
